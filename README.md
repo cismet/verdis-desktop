@@ -29,6 +29,7 @@ VerDIS-Desktop is open-source software licensed under the [MIT License](https://
 If you have any questions, suggestions, or feedback, please don't hesitate to reach out to the project maintainers:
 
 - Project Lead: Thorsten Hell(@helllth)
+- Main Developer: David Glogaza(@d4v3000)
 
 Feel free to submit issues through the GitHub issue tracker.
 

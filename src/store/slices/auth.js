@@ -1,6 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { ENDPOINT, jwtTestQuery } from "../../constants/verdis";
 
-const initialState = { jwt: undefined, login: undefined, loginRequested: false };
+const initialState = {
+  jwt: undefined,
+  login: undefined,
+  loginRequested: false,
+};
 
 const slice = createSlice({
   name: "auth",
@@ -50,4 +55,33 @@ export const getLoginFromJWT = (jwt) => {
 
     return JSON.parse(jsonPayload).sub;
   }
+};
+
+export const checkJWTValidation = () => {
+  return async (dispatch, getState) => {
+    const jwt = getState().auth.jwt;
+
+    fetch(ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwt}`,
+      },
+      body: JSON.stringify({
+        query: jwtTestQuery,
+      }),
+    })
+      .then((result) => {
+        if (result.status === 401) {
+          dispatch(storeJWT(undefined));
+          dispatch(storeLogin(undefined));
+        }
+      })
+      .catch((error) => {
+        console.error(
+          "There was a problem with the fetch operation:",
+          error.message
+        );
+      });
+  };
 };

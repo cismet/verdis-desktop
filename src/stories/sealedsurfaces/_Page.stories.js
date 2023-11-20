@@ -7,7 +7,7 @@ export default {
   title: "SealedSurfaces/Page",
   component: Page,
   decorators: [withDesign],
-  args: { inStory: true },
+  args: { inStory: true, showChat: false },
   parameters: {
     design: {
       type: "image",

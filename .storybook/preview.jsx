@@ -1,4 +1,8 @@
 /** @type { import('@storybook/react').Preview } */
+import { ConfigProvider } from "antd";
+import locale from "antd/locale/de_DE";
+import "tailwindcss/tailwind.css";
+import "../src/index.css";
 const preview = {
   parameters: {
     actions: { argTypesRegex: "^on[A-Z].*" },
@@ -16,13 +20,13 @@ const preview = {
           "Overview",
           ["Page", "Components"],
           "SealedSurfaces",
-          ["Page", "Components"],
+          ["Page", "DetailsPage", "Components"],
           "StreetCleaning",
-          ["Page", "Components"],
-          "GeneralInfo",
+          ["Page", "DetailsPage", "Components"],
+          "Info",
           ["Page", "Components"],
           "SeepagePermits",
-          ["Page", "Components"],
+          ["Page", "DetailsPage", "Components"],
           "Settings",
           ["Page", "Components"],
           "Chat",
@@ -31,6 +35,20 @@ const preview = {
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#E67843",
+          },
+        }}
+        locale={locale}
+      >
+        <Story />
+      </ConfigProvider>
+    ),
+  ],
 };
 
 export default preview;

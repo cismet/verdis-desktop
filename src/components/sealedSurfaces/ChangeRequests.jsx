@@ -1,10 +1,6 @@
-import { Card, Row, Col } from "antd";
-import Typography from "antd/es/typography/Typography";
 import PropTypes from "prop-types";
-import { FilePdfOutlined } from "@ant-design/icons";
-import React, { useRef, useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import React from "react";
+import CustomCard from "../ui/Card";
 const mockExtractor = (input) => {
   return {
     status: "neue Nachricht",
@@ -24,28 +20,10 @@ const ChangeRequests = ({
 }) => {
   const data = extractor(dataIn);
 
-  const cardRef = useRef();
-  const [dimensions, setDimensions] = useState({});
   const title = "Änderungsanfragen";
-  useEffect(() => {
-    if (cardRef.current) {
-      setDimensions(cardRef.current.getBoundingClientRect());
-    }
-  }, []);
 
   return (
-    <Card
-      style={{ ...style, width, height }}
-      ref={cardRef}
-      title={
-        <span>
-          <FontAwesomeIcon icon={faBars} /> {title}
-        </span>
-      }
-      size="small"
-      hoverable={false}
-      shadow={true}
-    >
+    <CustomCard style={{ ...style, width, height }} title={title} fullHeight>
       <p>
         Status: <b>{data.status}</b>
       </p>
@@ -60,7 +38,7 @@ const ChangeRequests = ({
           );
         })}
       </p>
-    </Card>
+    </CustomCard>
   );
 };
 export default ChangeRequests;

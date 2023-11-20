@@ -1,7 +1,35 @@
 import React from "react";
 import Map from "../components/commons/Map";
-import { Col, Row } from "antd";
-import MockCard from "../components/mock/MockCard";
+import General from "../components/overview/General";
+import Statistics from "../components/overview/Statistics";
+import CrossReferences from "../components/overview/CrossReferences";
+import Sums from "../components/sealedSurfaces/Sums";
+import Summary from "../components/overview/Summary";
+import InfoBar from "../components/commons/InfoBar";
+import {
+  generalExtractor,
+  mappingExtractor,
+  statisticsExtractor,
+  summaryExtractor,
+  sumsExtractor,
+} from "../tools/extractors";
+import {
+  getKassenzeichen,
+  searchForKassenzeichenWithPoint,
+} from "../store/slices/search";
+import { useDispatch, useSelector } from "react-redux";
+
+import {
+  getBefreiungErlaubnisCollection,
+  getFlaechenCollection,
+  getFrontenCollection,
+  getGeneralGeometryCollection,
+} from "../store/slices/mapping";
+import { getOverviewFeatureTypes } from "../store/slices/ui";
+import { convertLatLngToXY } from "../tools/mappingTools";
+import { useSearchParams } from "react-router-dom";
+import FeatureMapLayer from "../components/commons/FeatureMapLayer";
+import { isEmpty } from "lodash";
 
 const Page = ({ width = "100%", height = "100%", inStory = false }) => {
   let storyStyle = {};
@@ -13,47 +41,98 @@ const Page = ({ width = "100%", height = "100%", inStory = false }) => {
     };
   }
 
-  const firstColCardStyle = {
+  const cardStyle = {
     width: "100%",
-    height: height / 3 - 8,
+    height: "100%",
   };
-  const firstRowCardStyle = {
-    width: "100%",
-    height: height * 0.3 - 12,
-  };
-  const mapHeight = height * 0.7;
+  const kassenzeichen = useSelector(getKassenzeichen);
+  const flaechenArray = useSelector(getFlaechenCollection);
+  const frontenArray = useSelector(getFrontenCollection);
+  const generalGeomArray = useSelector(getGeneralGeometryCollection);
+  const overviewFeatureTypes = useSelector(getOverviewFeatureTypes) || [];
+  const befreiungErlaubnisseArray = useSelector(
+    getBefreiungErlaubnisCollection
+  );
+  const dispatch = useDispatch();
+  const [urlParams, setUrlParams] = useSearchParams();
 
   return (
-    <div style={{ ...storyStyle, width, height }}>
-      <Row gutter={[12, 0]} style={{ height: "100%" }}>
-        <Col span={6}>
-          <Row gutter={[0, 12]}>
-            <MockCard style={firstColCardStyle} title="Allgemein" />
-          </Row>
-          <Row gutter={[0, 12]}>
-            <MockCard
-              style={{ ...firstColCardStyle, marginTop: 12, marginBottom: 12 }}
-              title="Summen"
-            />
-          </Row>
-          <Row gutter={[0, 12]}>
-            <MockCard style={firstColCardStyle} title="ESW Zusammenfassung" />
-          </Row>
-        </Col>
-        <Col span={18}>
-          <Row gutter={[12, 12]} style={{ height: "30%" }}>
-            <Col span={12}>
-              <MockCard style={firstRowCardStyle} title="Statistik" />
-            </Col>
-            <Col span={12}>
-              <MockCard style={firstRowCardStyle} title="Querverweise" />
-            </Col>
-          </Row>
-          <Row style={{ height: "70%" }}>
-            <Map width={"100%"} height={mapHeight} />
-          </Row>
-        </Col>
-      </Row>
+    <div
+      style={{ ...storyStyle, width, height }}
+      className="flex flex-col items-center relative h-full max-h-[calc(100vh-73px)]"
+    >
+      <div className="flex flex-col gap-2 w-full bg-zinc-100 h-full overflow-clip p-2">
+        <InfoBar title="Übersicht" className="py-1" />
+
+        <div className="grid grid-cols-3 grid-rows-3 gap-2 w-full h-full max-h-[calc(100%-40px)]">
+          <General
+            width={cardStyle.width}
+            height={cardStyle.height}
+            style={cardStyle}
+            extractor={generalExtractor}
+          />
+          <Statistics
+            width={cardStyle.width}
+            height={cardStyle.height}
+            style={cardStyle}
+            extractor={statisticsExtractor}
+          />
+          <CrossReferences
+            width={cardStyle.width}
+            height={cardStyle.height}
+            style={cardStyle}
+          />
+          <Sums
+            width={cardStyle.width}
+            height={cardStyle.height}
+            style={cardStyle}
+            extractor={sumsExtractor}
+          />
+          <div className="col-span-2 row-span-2">
+            <Map
+              key={"overview.map"}
+              width={"calc(100%-40px)"}
+              height={"100%"}
+              dataIn={{
+                kassenzeichen,
+                flaechenArray,
+                frontenArray,
+                generalGeomArray,
+                befreiungErlaubnisseArray,
+                shownFeatureTypes: overviewFeatureTypes,
+                ondblclick: (event) => {
+                  console.log(
+                    "xxx event.öatlng",
+                    convertLatLngToXY(event.latlng)
+                  );
+                  const xy = convertLatLngToXY(event.latlng);
+                  dispatch(
+                    searchForKassenzeichenWithPoint(
+                      xy[0],
+                      xy[1],
+                      urlParams,
+                      setUrlParams
+                    )
+                  );
+                },
+              }}
+              extractor={mappingExtractor}
+            >
+              <FeatureMapLayer
+                featureTypes={
+                  isEmpty(kassenzeichen) ? ["flaeche"] : overviewFeatureTypes
+                }
+              />
+            </Map>
+          </div>
+          <Summary
+            width={cardStyle.width}
+            height={cardStyle.height}
+            style={cardStyle}
+            extractor={summaryExtractor}
+          />
+        </div>
+      </div>
     </div>
   );
 };
